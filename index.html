@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lulu App — Your Daily Spiritual Sanctuary</title>
+    
+    <!-- Google Fonts: Inter for UI, Amiri for Arabic calligraphy, Playfair Display for Serifs -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        arabic: ['Amiri', 'serif'],
+                    },
+                    colors: {
+                        obsidian: '#050508',
+                        midnight: '#0D0E15',
+                        gold: {
+                            DEFAULT: '#D4AF37',
+                            light: '#F3E5AB',
+                            dark: '#AA820A'
+                        },
+                        emerald: {
+                            DEFAULT: '#10B981',
+                            glow: 'rgba(16, 185, 129, 0.15)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Premium Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050508;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #222533;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #D4AF37;
+        }
+
+        /* Glassmorphic Utilities */
+        .glass-panel {
+            background: rgba(13, 14, 21, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glass-card-interactive {
+            background: rgba(20, 21, 33, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-interactive:hover {
+            border-color: rgba(212, 175, 55, 0.3);
+            background: rgba(20, 21, 33, 0.7);
+            box-shadow: 0 10px 30px -10px rgba(212, 175, 55, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Golden Glows */
+        .glow-gold-sm {
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+        }
+        .glow-gold-md {
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+        }
+
+        /* CSS Scale Haptic effect */
+        .haptic-btn {
+            transition: transform 0.1s ease-in-out;
+        }
+        .haptic-btn:active {
+            transform: scale(0.94);
+        }
+
+        /* Nav Transition */
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: #D4AF37;
+            transition: width 0.3s ease;
+        }
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        /* Page Transitions */
+        .page-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .page-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-obsidian text-slate-100 font-sans min-h-screen relative overflow-x-hidden selection:bg-gold selection:text-obsidian">
+
+    <!-- Interactive Starry Sky Canvas Background -->
+    <canvas id="starfield" class="fixed top-0 left-0 w-full h-full pointer-events-none z-0"></canvas>
+
+    <!-- Top Navigation Bar -->
+    <header class="fixed top-0 left-0 w-full z-50 glass-panel border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <!-- Logo Section -->
+            <a href="#" onclick="switchTab('home')" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-gold-dark via-gold to-gold-light flex items-center justify-center glow-gold-sm group-hover:rotate-12 transition-transform duration-500">
+                    <span class="font-serif text-obsidian font-bold text-xl">L</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-serif text-xl tracking-wider font-semibold text-slate-100 group-hover:text-gold transition-colors">Lulu</span>
+                    <span class="text-[9px] tracking-[0.2em] text-gold/80 -mt-1 uppercase">Sanctuary</span>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center gap-8">
+                <button onclick="switchTab('home')" id="nav-home" class="nav-link active text-sm font-medium tracking-wide text-slate-300 hover:text-gold transition-colors">Home</button>
+                <button onclick="switchTab('dhikr')" id="nav-dhikr" class="nav-link text-sm font-medium tracking-wide text-slate-300 hover:text-gold transition-colors">Digital Dhikr</button>
+                <button onclick="switchTab('duas')" id="nav-duas" class="nav-link text-sm font-medium tracking-wide text-slate-300 hover:text-gold transition-colors">Duas & Supplications</button>
+            </nav>
+
+            <!-- Navigation Actions -->
+            <div class="flex items-center gap-4">
+                <a href="#download" onclick="event.preventDefault(); switchTab('home'); setTimeout(() => document.getElementById('download-area').scrollIntoView({ behavior: 'smooth' }), 100);" class="hidden sm:inline-flex items-center px-5 py-2.5 rounded-full text-xs font-semibold tracking-wider uppercase border border-gold/40 hover:border-gold text-gold bg-gold/5 hover:bg-gold/10 transition-all duration-300">
+                    Download App
+                </a>
+                <!-- Mobile Navigation Toggle -->
+                <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-gold focus:outline-none p-2" aria-label="Toggle menu">
+                    <i class="fa-solid fa-bars-staggered text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobile-drawer" class="hidden md:hidden absolute top-20 left-0 w-full bg-midnight/95 border-b border-white/5 flex flex-col p-6 gap-5 transition-all duration-300">
+            <button onclick="switchTab('home')" class="text-left py-2 border-b border-white/5 text-slate-200 hover:text-gold">Home</button>
+            <button onclick="switchTab('dhikr')" class="text-left py-2 border-b border-white/5 text-slate-200 hover:text-gold">Digital Dhikr</button>
+            <button onclick="switchTab('duas')" class="text-left py-2 border-b border-white/5 text-slate-200 hover:text-gold">Duas & Supplications</button>
+            <a href="#download" onclick="switchTab('home'); document.getElementById('download-area').scrollIntoView({ behavior: 'smooth' }); toggleMobileMenu();" class="text-center py-3 rounded-full text-sm font-semibold border border-gold text-gold bg-gold/5">Download App</a>
+        </div>
+    </header>
+
+    <!-- Main Dynamic Content Container -->
+    <main class="relative z-10 pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-[calc(100vh-112px)]">
+
+        <!-- SECTION 1: HERO / APP PROMOTION (Home) -->
+        <section id="section-home" class="page-section active space-y-16">
+            
+            <!-- Quranic Core Verse Banner -->
+            <div class="max-w-4xl mx-auto text-center py-6 px-4 rounded-3xl bg-gradient-to-b from-white/[0.03] to-transparent border border-white/[0.02]">
+                <p class="font-arabic text-2xl sm:text-3xl text-gold/90 mb-3 leading-relaxed tracking-wide">أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ</p>
+                <p class="font-serif italic text-sm sm:text-base text-slate-300 max-w-xl mx-auto">
+                    "Unquestionably, by the remembrance of Allah hearts are assured." 
+                </p>
+                <p class="text-[10px] tracking-widest text-gold/60 uppercase mt-1">Surah Ar-Ra'd 13:28</p>
+            </div>
+
+            <!-- Two-Column Interactive Hero Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pt-4">
+                <!-- Branding, CTA, Copy -->
+                <div class="lg:col-span-7 space-y-8 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-panel border border-gold/20 text-gold text-xs font-semibold uppercase tracking-widest">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse"></span>
+                        Spiritual Sanctuary for Mind & Soul
+                    </div>
+                    <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl text-slate-100 leading-[1.15] font-normal">
+                        Elevate your journey of <br class="hidden sm:inline">
+                        <span class="font-serif italic text-gold relative">
+                            remembrance & reflection.
+                        </span>
+                    </h1>
+                    <p class="text-slate-400 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
+                        Lulu App provides an exquisite, distraction-free environment for daily prayer trackers, interactive supplications, and beautiful digital Tasbih counters designed to cultivate stillness in modern life.
+                    </p>
+
+                    <!-- Interactive Micro-Feature Highlights -->
+                    <div class="grid grid-cols-2 gap-4 max-w-md mx-auto lg:mx-0">
+                        <div onclick="switchTab('dhikr')" class="cursor-pointer glass-card-interactive p-4 rounded-2xl flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center text-gold">
+                                <i class="fa-solid fa-calculator"></i>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-xs font-semibold text-slate-200">Interactive Tasbih</p>
+                                <p class="text-[10px] text-slate-400">Launch direct counter</p>
+                            </div>
+                        </div>
+                        <div onclick="switchTab('duas')" class="cursor-pointer glass-card-interactive p-4 rounded-2xl flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-emerald/10 flex items-center justify-center text-emerald">
+                                <i class="fa-solid fa-book-open"></i>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-xs font-semibold text-slate-200">Dua Companion</p>
+                                <p class="text-[10px] text-slate-400">Curated supplications</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Badge CTA Buttons -->
+                    <div id="download-area" class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+                        <a href="#" class="w-48 h-14 flex items-center justify-center bg-white text-obsidian rounded-xl font-semibold gap-3 hover:bg-slate-200 transition-all duration-300 shadow-xl shadow-white/5">
+                            <i class="fa-brands fa-apple text-2xl"></i>
+                            <div class="flex flex-col text-left">
+                                <span class="text-[10px] uppercase font-normal tracking-wide leading-none">Download on the</span>
+                                <span class="text-sm font-bold leading-tight">App Store</span>
+                            </div>
+                        </a>
+                        <a href="#" class="w-48 h-14 flex items-center justify-center bg-neutral-900 border border-white/10 text-slate-100 rounded-xl font-semibold gap-3 hover:bg-neutral-800 transition-all duration-300">
+                            <i class="fa-brands fa-google-play text-xl text-emerald"></i>
+                            <div class="flex flex-col text-left">
+                                <span class="text-[10px] uppercase font-normal tracking-wide leading-none">Get it on</span>
+                                <span class="text-sm font-bold leading-tight">Google Play</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Premium Device Mockup Display -->
+                <div class="lg:col-span-5 flex justify-center relative">
+                    <!-- Glow effect Behind -->
+                    <div class="absolute w-72 h-72 rounded-full bg-gold/10 blur-3xl -top-10 -right-10 pointer-events-none"></div>
+                    <div class="absolute w-72 h-72 rounded-full bg-emerald/5 blur-3xl -bottom-10 -left-10 pointer-events-none"></div>
+
+                    <!-- Glass Frame Device -->
+                    <div class="w-[290px] h-[580px] rounded-[50px] border-[6px] border-slate-800 bg-obsidian/80 backdrop-blur-2xl shadow-2xl relative p-4 overflow-hidden glow-gold-sm">
+                        <!-- Speaker Bar -->
+                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-slate-800 rounded-b-2xl z-20 flex items-center justify-center">
+                            <div class="w-12 h-1 bg-neutral-900 rounded-full"></div>
+                        </div>
+
+                        <!-- Inside Device UI Design -->
+                        <div class="h-full flex flex-col justify-between pt-6 pb-2 text-center text-slate-200">
+                            <!-- Device Header Status Bar -->
+                            <div class="flex justify-between items-center text-[10px] tracking-wider text-slate-400 px-3 py-1">
+                                <span>Lulu Safe-Space</span>
+                                <div class="flex gap-1.5 items-center">
+                                    <i class="fa-solid fa-wifi"></i>
+                                    <i class="fa-solid fa-battery-three-quarters text-emerald"></i>
+                                </div>
+                            </div>
+
+                            <!-- Mini Widget Area -->
+                            <div class="mt-6 space-y-4">
+                                <div class="glass-panel py-3 px-4 rounded-2xl mx-2 border border-white/5">
+                                    <p class="text-[10px] text-gold uppercase tracking-widest font-semibold">Active Sanctuary Mode</p>
+                                    <h3 class="font-serif text-lg mt-1">As-Sajdah Reflection</h3>
+                                    <p class="text-[9px] text-slate-400 italic mt-0.5">Focus: Inner Stillness & Calm</p>
+                                </div>
+
+                                <!-- Tiny Audio Player UI -->
+                                <div class="glass-panel p-3 rounded-2xl mx-2 border border-white/5 space-y-2">
+                                    <div class="flex justify-between items-center">
+                                        <p class="text-[10px] font-medium">Recitation stream</p>
+                                        <span class="text-[8px] px-2 py-0.5 rounded-full bg-emerald/10 text-emerald uppercase font-semibold">HD Audio</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 justify-center py-2">
+                                        <button class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-backward-step text-xs"></i></button>
+                                        <button class="w-8 h-8 rounded-full bg-gold text-obsidian flex items-center justify-center text-xs"><i class="fa-solid fa-play ml-0.5"></i></button>
+                                        <button class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-forward-step text-xs"></i></button>
+                                    </div>
+                                    <div class="w-full bg-neutral-800 h-1 rounded-full overflow-hidden">
+                                        <div class="bg-gold h-full w-1/3"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Dashboard Icon representation -->
+                            <div class="space-y-2">
+                                <div class="w-20 h-20 rounded-full border border-gold/40 mx-auto flex items-center justify-center bg-gold/5 relative">
+                                    <div class="absolute w-16 h-16 rounded-full border border-dashed border-gold/20 animate-spin" style="animation-duration: 15s"></div>
+                                    <i class="fa-solid fa-hand-holding-heart text-gold text-2xl"></i>
+                                </div>
+                                <p class="text-[11px] font-medium text-slate-300">Hold core for daily checklist</p>
+                            </div>
+
+                            <!-- Navigation tabs inside device -->
+                            <div class="grid grid-cols-4 gap-1 border-t border-white/5 pt-3 text-[9px] text-slate-400">
+                                <div class="text-gold flex flex-col items-center"><i class="fa-solid fa-circle-nodes mb-1"></i>Portal</div>
+                                <div class="flex flex-col items-center"><i class="fa-solid fa-heart-pulse mb-1"></i>Mind</div>
+                                <div class="flex flex-col items-center"><i class="fa-solid fa-compass mb-1"></i>Qibla</div>
+                                <div class="flex flex-col items-center"><i class="fa-solid fa-user-gear mb-1"></i>Profile</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- SECTION 2: INTERACTIVE DHIKR PAGE -->
+        <section id="section-dhikr" class="page-section space-y-12">
+            
+            <!-- Context Header with Hadith Integration -->
+            <div class="max-w-3xl mx-auto text-center space-y-4">
+                <span class="text-gold uppercase tracking-widest text-xs font-semibold">The Sanctuary Core</span>
+                <h2 class="font-serif text-3xl sm:text-4xl">Sacred Daily Adhkar</h2>
+                <div class="p-6 rounded-2xl glass-panel border border-white/5 italic text-slate-300 space-y-2">
+                    <p class="text-sm sm:text-base leading-relaxed">
+                        "The parable of the one who remembers his Lord and the one who does not remember his Lord is that of the living and the dead."
+                    </p>
+                    <p class="text-[10px] tracking-widest text-gold/60 uppercase">— Sahih al-Bukhari</p>
+                </div>
+            </div>
+
+            <!-- Interactive Digital Tasbih Board -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Settings Panel (Left/Top) -->
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="glass-panel p-6 rounded-3xl space-y-6">
+                        <h3 class="text-sm uppercase tracking-wider text-slate-200 font-semibold border-b border-white/5 pb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-gold text-xs"></i> Session Configurations
+                        </h3>
+                        
+                        <!-- Phrase Selection -->
+                        <div class="space-y-3">
+                            <label class="text-xs text-slate-400 uppercase tracking-wider block">Choose Adhkar Phrase</label>
+                            <div class="space-y-2" id="phrase-selectors">
+                                <button onclick="selectPhrase('subhanallah', 'سُبْحَانَ ٱللَّٰهِ', 'Glory be to Allah')" class="w-full text-left p-3 rounded-xl border border-gold/30 bg-gold/5 flex justify-between items-center transition-all group phrase-option active" id="phrase-subhanallah">
+                                    <div class="text-left">
+                                        <p class="text-sm font-semibold text-slate-200 group-hover:text-gold">Subhanallah</p>
+                                        <p class="text-[10px] text-slate-400">Glory be to Allah</p>
+                                    </div>
+                                    <span class="font-arabic text-lg text-gold">سُبْحَانَ ٱللَّٰهِ</span>
+                                </button>
+                                <button onclick="selectPhrase('alhamdulillah', 'ٱلْحَمْدُ لِلَّٰهِ', 'Praise be to Allah')" class="w-full text-left p-3 rounded-xl border border-white/5 hover:border-white/10 flex justify-between items-center transition-all group phrase-option" id="phrase-alhamdulillah">
+                                    <div class="text-left">
+                                        <p class="text-sm font-semibold text-slate-200 group-hover:text-gold">Alhamdulillah</p>
+                                        <p class="text-[10px] text-slate-400">Praise be to Allah</p>
+                                    </div>
+                                    <span class="font-arabic text-lg text-slate-400">ٱلْحَمْدُ لِلَّٰهِ</span>
+                                </button>
+                                <button onclick="selectPhrase('allahuakbar', 'ٱللَّٰهُ أَكْبَرُ', 'Allah is Greatest')" class="w-full text-left p-3 rounded-xl border border-white/5 hover:border-white/10 flex justify-between items-center transition-all group phrase-option" id="phrase-allahuakbar">
+                                    <div class="text-left">
+                                        <p class="text-sm font-semibold text-slate-200 group-hover:text-gold">Allahu Akbar</p>
+                                        <p class="text-[10px] text-slate-400">Allah is Greatest</p>
+                                    </div>
+                                    <span class="font-arabic text-lg text-slate-400">ٱللَّٰهُ أَكْبَرُ</span>
+                                </button>
+                                <button onclick="selectPhrase('istighfar', 'أَسْتَغْفِرُ ٱللَّٰهَ', 'I seek forgiveness from Allah')" class="w-full text-left p-3 rounded-xl border border-white/5 hover:border-white/10 flex justify-between items-center transition-all group phrase-option" id="phrase-istighfar">
+                                    <div class="text-left">
+                                        <p class="text-sm font-semibold text-slate-200 group-hover:text-gold">Astaghfirullah</p>
+                                        <p class="text-[10px] text-slate-400">I seek forgiveness</p>
+                                    </div>
+                                    <span class="font-arabic text-lg text-slate-400">أَسْتَغْفِرُ ٱللَّٰهَ</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Target Limit Select -->
+                        <div class="space-y-3 pt-4 border-t border-white/5">
+                            <label class="text-xs text-slate-400 uppercase tracking-wider block">Session Target</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setTarget(33)" id="target-33" class="py-2 px-3 text-xs font-semibold rounded-lg bg-gold/10 text-gold border border-gold/30 target-option">33 Reps</button>
+                                <button onclick="setTarget(99)" id="target-99" class="py-2 px-3 text-xs font-semibold rounded-lg bg-neutral-900 text-slate-400 border border-white/5 hover:border-white/10 target-option">99 Reps</button>
+                                <button onclick="setTarget(0)" id="target-0" class="py-2 px-3 text-xs font-semibold rounded-lg bg-neutral-900 text-slate-400 border border-white/5 hover:border-white/10 target-option">∞ Free</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Counter Engine (Right/Bottom) -->
+                <div class="lg:col-span-8">
+                    <div class="glass-panel p-8 rounded-3xl flex flex-col items-center justify-between min-h-[500px] border border-white/5 relative overflow-hidden">
+                        
+                        <!-- Status Bar inside Counter -->
+                        <div class="w-full flex justify-between items-center z-10">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald animate-pulse"></span>
+                                <span class="text-xs text-slate-300 font-medium tracking-wide">Live Reflection</span>
+                            </div>
+                            <button onclick="resetCounter()" class="px-3.5 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-gold text-xs font-semibold transition-all flex items-center gap-1.5 haptic-btn">
+                                <i class="fa-solid fa-rotate-left"></i> Reset Count
+                            </button>
+                        </div>
+
+                        <!-- Main Screen Displaying Selected Phrase -->
+                        <div class="text-center space-y-3 my-4 z-10">
+                            <p class="font-arabic text-4xl sm:text-5xl lg:text-6xl text-gold min-h-[72px]" id="counter-arabic">سُبْحَانَ ٱللَّٰهِ</p>
+                            <p class="text-sm sm:text-base text-slate-400 italic" id="counter-translation">Glory be to Allah</p>
+                        </div>
+
+                        <!-- Interactive Click Ring Trigger -->
+                        <div class="relative flex items-center justify-center my-6 z-10">
+                            <!-- Background Glowing Ring -->
+                            <div id="glow-ring" class="absolute w-56 h-56 rounded-full border border-gold/10 transition-all duration-300"></div>
+                            
+                            <!-- Middle visual circle with Progress dynamic styling -->
+                            <div class="absolute w-48 h-48 rounded-full border border-white/5 flex items-center justify-center"></div>
+
+                            <!-- Click Button -->
+                            <button onclick="incrementCounter()" class="haptic-btn w-40 h-40 rounded-full bg-gradient-to-tr from-midnight via-neutral-900 to-neutral-800 border-[3px] border-white/10 hover:border-gold/60 flex flex-col items-center justify-center relative shadow-2xl focus:outline-none transition-all group overflow-hidden">
+                                <span class="text-4xl sm:text-5xl font-light tracking-tight text-slate-100 font-serif" id="main-count">0</span>
+                                <span class="text-[9px] text-slate-400 uppercase tracking-widest mt-1 group-hover:text-gold transition-colors">Tap Sphere</span>
+                            </button>
+                        </div>
+
+                        <!-- Dynamic Counter Meta (Target, Sound Option) -->
+                        <div class="w-full flex justify-between items-center pt-4 border-t border-white/5 z-10">
+                            <div class="text-left">
+                                <p class="text-[10px] text-slate-400 uppercase tracking-wider">Progress Ratio</p>
+                                <p class="text-xs text-slate-200 font-semibold" id="progress-text">0 / 33 Done</p>
+                            </div>
+
+                            <button onclick="toggleAudio()" class="px-3.5 py-1.5 rounded-lg border border-white/5 bg-neutral-900 hover:bg-neutral-800 text-slate-300 text-xs font-semibold transition-all flex items-center gap-1.5" id="audio-toggle-btn">
+                                <i class="fa-solid fa-volume-high text-gold" id="audio-icon"></i> <span id="audio-status-text">Audio Feed</span>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- SECTION 3: DUAS & REMEMBRANCE -->
+        <section id="section-duas" class="page-section space-y-10">
+            
+            <!-- Context Header with Filter System -->
+            <div class="max-w-3xl mx-auto text-center space-y-6">
+                <div class="space-y-2">
+                    <span class="text-gold uppercase tracking-widest text-xs font-semibold">The Remembrance Core</span>
+                    <h2 class="font-serif text-3xl sm:text-4xl">Sacred Supplications</h2>
+                    <p class="text-slate-400 text-sm sm:text-base max-w-lg mx-auto">Explore a peaceful sanctuary of morning, evening, and situational Duas compiled from authentic records.</p>
+                </div>
+
+                <!-- Instant Filter System (Without reload) -->
+                <div class="flex flex-wrap justify-center gap-2 pt-2" id="filter-container">
+                    <button onclick="filterDuas('all')" class="dua-filter-btn px-4 py-2 text-xs font-medium tracking-wide uppercase rounded-full bg-gold text-obsidian glow-gold-sm transition-all">All Supplications</button>
+                    <button onclick="filterDuas('morning')" class="dua-filter-btn px-4 py-2 text-xs font-medium tracking-wide uppercase rounded-full bg-neutral-900 text-slate-300 hover:text-slate-100 border border-white/5 hover:border-white/10 transition-all">Morning</button>
+                    <button onclick="filterDuas('evening')" class="dua-filter-btn px-4 py-2 text-xs font-medium tracking-wide uppercase rounded-full bg-neutral-900 text-slate-300 hover:text-slate-100 border border-white/5 hover:border-white/10 transition-all">Evening</button>
+                    <button onclick="filterDuas('protection')" class="dua-filter-btn px-4 py-2 text-xs font-medium tracking-wide uppercase rounded-full bg-neutral-900 text-slate-300 hover:text-slate-100 border border-white/5 hover:border-white/10 transition-all">Protection</button>
+                    <button onclick="filterDuas('forgiveness')" class="dua-filter-btn px-4 py-2 text-xs font-medium tracking-wide uppercase rounded-full bg-neutral-900 text-slate-300 hover:text-slate-100 border border-white/5 hover:border-white/10 transition-all">Forgiveness</button>
+                </div>
+            </div>
+
+            <!-- Supplications Responsive Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="duas-grid">
+                
+                <!-- Dua Card 1 (Morning) -->
+                <div class="glass-card-interactive p-6 rounded-3xl space-y-5 flex flex-col justify-between" data-category="morning">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] px-2.5 py-1 rounded-full bg-gold/10 text-gold uppercase tracking-wider font-semibold">Morning Devotions</span>
+                            <span class="text-[9px] text-slate-400">Authentic Recitation</span>
+                        </div>
+                        <h3 class="font-serif text-xl font-normal text-slate-100">Welcome of the Day</h3>
+                        <p class="font-arabic text-xl sm:text-2xl text-right leading-loose text-gold py-2">
+                            أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ وَالْحَمْدُ لِلَّهِ لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ
+                        </p>
+                    </div>
+
+                    <!-- Expandable Context Drawer -->
+                    <div class="border-t border-white/5 pt-4 space-y-3">
+                        <button onclick="toggleDuaExpansion(this)" class="w-full flex justify-between items-center text-xs text-slate-400 hover:text-slate-200 font-medium py-1">
+                            <span>View Transliteration & English Meaning</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300"></i>
+                        </button>
+                        <div class="hidden overflow-hidden space-y-3 text-xs leading-relaxed transition-all text-slate-300">
+                            <div>
+                                <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Transliteration</p>
+                                <p class="italic">"Asbahna wa-asbahal-mulku lillah, wal-hamdu lillah, la ilaha illallahu wahdahu la sharika lah."</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">English Translation</p>
+                                <p class="text-slate-400">"We have entered a new day and with it all dominion is Allah's. Praise is to Allah. There is no deity except Allah, alone, without partner."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dua Card 2 (Evening) -->
+                <div class="glass-card-interactive p-6 rounded-3xl space-y-5 flex flex-col justify-between" data-category="evening">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] px-2.5 py-1 rounded-full bg-gold/10 text-gold uppercase tracking-wider font-semibold">Evening Devotions</span>
+                            <span class="text-[9px] text-slate-400">Authentic Recitation</span>
+                        </div>
+                        <h3 class="font-serif text-xl font-normal text-slate-100">Welcome of the Night</h3>
+                        <p class="font-arabic text-xl sm:text-2xl text-right leading-loose text-gold py-2">
+                            أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ وَالْحَمْدُ لِلَّهِ لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ
+                        </p>
+                    </div>
+
+                    <!-- Expandable Context Drawer -->
+                    <div class="border-t border-white/5 pt-4 space-y-3">
+                        <button onclick="toggleDuaExpansion(this)" class="w-full flex justify-between items-center text-xs text-slate-400 hover:text-slate-200 font-medium py-1">
+                            <span>View Transliteration & English Meaning</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300"></i>
+                        </button>
+                        <div class="hidden overflow-hidden space-y-3 text-xs leading-relaxed transition-all text-slate-300">
+                            <div>
+                                <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Transliteration</p>
+                                <p class="italic">"Amsayna wa-amsal-mulku lillah, wal-hamdu lillah, la ilaha illallahu wahdahu la sharika lah."</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">English Translation</p>
+                                <p class="text-slate-400">"We have entered the evening and with it all dominion is Allah's. Praise is to Allah. There is no deity except Allah, alone, without partner."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dua Card 3 (Protection) -->
+                <div class="glass-card-interactive p-6 rounded-3xl space-y-5 flex flex-col justify-between" data-category="protection">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] px-2.5 py-1 rounded-full bg-emerald/10 text-emerald uppercase tracking-wider font-semibold">Protection</span>
+                            <span class="text-[9px] text-slate-400">Recite 3x Daily</span>
+                        </div>
+                        <h3 class="font-serif text-xl font-normal text-slate-100">Shield against Harm</h3>
+                        <p class="font-arabic text-xl sm:text-2xl text-right leading-loose text-gold py-2">
+                            بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ
+                        </p>
+                    </div>
+
+                    <!-- Expandable Context Drawer -->
+                    <div class="border-t border-white/5 pt-4 space-y-3">
+                        <button onclick="toggleDuaExpansion(this)" class="w-full flex justify-between items-center text-xs text-slate-400 hover:text-slate-200 font-medium py-1">
+                            <span>View Transliteration & English Meaning</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300"></i>
+                        </button>
+                        <div class="hidden overflow-hidden space-y-3 text-xs leading-relaxed transition-all text-slate-300">
+                            <div>
+                                <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Transliteration</p>
+                                <p class="italic">"Bismillahil-lazi la yadurru ma'as-mihi shai'un fil-ardi wa la fis-sama'i, wa Huwas-Sami'ul-'Alim."</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">English Translation</p>
+                                <p class="text-slate-400">"In the Name of Allah, with Whose Name nothing is harmed on Earth nor in the heaven, and He is the All-Hearing, the All-Knowing."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dua Card 4 (Forgiveness) -->
+                <div class="glass-card-interactive p-6 rounded-3xl space-y-5 flex flex-col justify-between" data-category="forgiveness">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] px-2.5 py-1 rounded-full bg-gold/10 text-gold uppercase tracking-wider font-semibold">Master Supplication</span>
+                            <span class="text-[9px] text-slate-400">Repentance Priority</span>
+                        </div>
+                        <h3 class="font-serif text-xl font-normal text-slate-100">Sayyidul Istighfar</h3>
+                        <p class="font-arabic text-xl sm:text-2xl text-right leading-loose text-gold py-2">
+                            اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ خَلَقْتَنِي وَأَنَا عَبْدُكَ وَأَنَا عَلَى عَهْدِكَ
+                        </p>
+                    </div>
+
+                    <!-- Expandable Context Drawer -->
+                    <div class="border-t border-white/5 pt-4 space-y-3">
+                        <button onclick="toggleDuaExpansion(this)" class="w-full flex justify-between items-center text-xs text-slate-400 hover:text-slate-200 font-medium py-1">
+                            <span>View Transliteration & English Meaning</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300"></i>
+                        </button>
+                        <div class="hidden overflow-hidden space-y-3 text-xs leading-relaxed transition-all text-slate-300">
+                            <div>
+                                <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Transliteration</p>
+                                <p class="italic">"Allahumma Anta Rabbi la ilaha illa Anta, khalaqtani wa ana 'abduka, wa ana 'ala 'ahdika wa wa'dika mastata'tu."</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">English Translation</p>
+                                <p class="text-slate-400">"O Allah, You are my Lord, there is no deity except You. You created me and I am Your servant, and I abide by Your covenant and promise as much as I can."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Sleek Minimalistic Footer -->
+    <footer class="border-t border-white/5 bg-obsidian py-8 relative z-10">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <div class="flex items-center gap-2">
+                <span class="font-serif text-gold font-semibold tracking-wider text-sm">LULU</span>
+                <span>© 2026 spiritual portal project. Crafted for digital stillness.</span>
+            </div>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-gold transition-colors">Privacy Policy</a>
+                <a href="#" class="hover:text-gold transition-colors">Terms of Sanctuary</a>
+                <a href="#" class="hover:text-gold transition-colors">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Ecosystem Logic -->
+    <script>
+        /*************************************************************
+         * 1. Dynamic Canvas Starfield Setup
+         *************************************************************/
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        let numStars = 110;
+        let mouseX = 0;
+        let mouseY = 0;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initializeStars();
+        }
+
+        function initializeStars() {
+            stars = [];
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5,
+                    brightness: Math.random(),
+                    speed: 0.005 + Math.random() * 0.015,
+                    twinkleDir: Math.random() > 0.5 ? 1 : -1
+                });
+            }
+        }
+
+        function renderStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw a subtle dark space vignette
+            let gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 10, canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height));
+            gradient.addColorStop(0, '#0a0b12');
+            gradient.addColorStop(1, '#050508');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Redraw stars
+            stars.forEach(star => {
+                // Brightness oscillation
+                star.brightness += star.speed * star.twinkleDir;
+                if (star.brightness > 1 || star.brightness < 0.1) {
+                    star.twinkleDir *= -1;
+                }
+
+                // Interactive slight mouse shifting offset (parallax feel)
+                const offsetX = (mouseX - canvas.width / 2) * 0.015;
+                const offsetY = (mouseY - canvas.height / 2) * 0.015;
+
+                ctx.beginPath();
+                ctx.arc(star.x + offsetX, star.y + offsetY, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(212, 175, 55, ${star.brightness})`; // Luxe Gold tint twinkling
+                ctx.fill();
+            });
+
+            requestAnimationFrame(renderStars);
+        }
+
+        // Mouse Parallax Trackers
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        renderStars();
+
+
+        /*************************************************************
+         * 2. Page & Router Tab Controller
+         *************************************************************/
+        function switchTab(sectionId) {
+            // Hide all tab containers
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Update visible tab active styling
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Active chosen section
+            const targetSection = document.getElementById(`section-${sectionId}`);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            const targetNav = document.getElementById(`nav-${sectionId}`);
+            if (targetNav) {
+                targetNav.classList.add('active');
+            }
+
+            // Collapse drawer if on mobile viewport
+            const drawer = document.getElementById('mobile-drawer');
+            drawer.classList.add('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Mobile Menu Drawer Toggling
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileDrawer = document.getElementById('mobile-drawer');
+
+        function toggleMobileMenu() {
+            mobileDrawer.classList.toggle('hidden');
+        }
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+        }
+
+
+        /*************************************************************
+         * 3. Digital Tasbih & Counter Logic
+         *************************************************************/
+        let count = 0;
+        let sessionTarget = 33;
+        let audioEnabled = true;
+
+        // Sound Synthesis Setup (Generates a beautifully clean "click/drop" using pure Web Audio API)
+        function playSynthesizedFeedback() {
+            if (!audioEnabled) return;
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(900, audioCtx.currentTime); // High frequency tick
+                osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.08); // drops instantly
+
+                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.08);
+            } catch (e) {
+                console.warn("Web Audio Context blocked or unavailable.", e);
+            }
+        }
+
+        function incrementCounter() {
+            count++;
+            
+            // Check targets
+            if (sessionTarget > 0 && count > sessionTarget) {
+                count = 1; // loop back seamlessly
+            }
+
+            document.getElementById('main-count').innerText = count;
+            playSynthesizedFeedback();
+            updateProgressText();
+            triggerVisualPulse();
+        }
+
+        function resetCounter() {
+            count = 0;
+            document.getElementById('main-count').innerText = count;
+            updateProgressText();
+        }
+
+        function setTarget(num) {
+            sessionTarget = num;
+            
+            // Update Active UI indicator buttons
+            document.querySelectorAll('.target-option').forEach(btn => {
+                btn.classList.remove('bg-gold/10', 'text-gold', 'border-gold/30');
+                btn.classList.add('bg-neutral-900', 'text-slate-400', 'border-white/5');
+            });
+
+            const activeBtn = document.getElementById(`target-${num}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-neutral-900', 'text-slate-400', 'border-white/5');
+                activeBtn.classList.add('bg-gold/10', 'text-gold', 'border-gold/30');
+            }
+
+            resetCounter();
+        }
+
+        function selectPhrase(id, arabic, translation) {
+            document.getElementById('counter-arabic').innerText = arabic;
+            document.getElementById('counter-translation').innerText = translation;
+
+            // Highlight Active Selector pill
+            document.querySelectorAll('.phrase-option').forEach(opt => {
+                opt.classList.remove('border-gold/30', 'bg-gold/5', 'phrase-option-active');
+                opt.classList.add('border-white/5');
+                // reset arabic text color of items not selected
+                const arabSpan = opt.querySelector('.font-arabic');
+                if (arabSpan) arabSpan.classList.replace('text-gold', 'text-slate-400');
+            });
+
+            const activeOption = document.getElementById(`phrase-${id}`);
+            if (activeOption) {
+                activeOption.classList.add('border-gold/30', 'bg-gold/5');
+                const arabSpan = activeOption.querySelector('.font-arabic');
+                if (arabSpan) arabSpan.classList.replace('text-slate-400', 'text-gold');
+            }
+
+            resetCounter();
+        }
+
+        function updateProgressText() {
+            const label = document.getElementById('progress-text');
+            if (sessionTarget === 0) {
+                label.innerText = `${count} / ∞ (No Limit)`;
+            } else {
+                label.innerText = `${count} / ${sessionTarget} Completed`;
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const statusLabel = document.getElementById('audio-status-text');
+            const icon = document.getElementById('audio-icon');
+
+            if (audioEnabled) {
+                statusLabel.innerText = "Audio Feed";
+                icon.className = "fa-solid fa-volume-high text-gold";
+            } else {
+                statusLabel.innerText = "Muted";
+                icon.className = "fa-solid fa-volume-xmark text-slate-500";
+            }
+        }
+
+        function triggerVisualPulse() {
+            const glowRing = document.getElementById('glow-ring');
+            glowRing.classList.remove('border-gold/10');
+            glowRing.classList.add('border-gold/70', 'scale-110');
+            
+            setTimeout(() => {
+                glowRing.classList.remove('border-gold/70', 'scale-110');
+                glowRing.classList.add('border-gold/10');
+            }, 150);
+        }
+
+
+        /*************************************************************
+         * 4. Supplications & Filters Engine
+         *************************************************************/
+        function filterDuas(category) {
+            // Update filter chip UI active classes
+            const buttons = document.querySelectorAll('.dua-filter-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-gold', 'text-obsidian', 'glow-gold-sm');
+                btn.classList.add('bg-neutral-900', 'text-slate-300', 'border', 'border-white/5');
+            });
+
+            // Find current clicked button to style it active
+            const clickedBtn = event.currentTarget;
+            clickedBtn.classList.remove('bg-neutral-900', 'text-slate-300', 'border', 'border-white/5');
+            clickedBtn.classList.add('bg-gold', 'text-obsidian', 'glow-gold-sm');
+
+            // Dynamic card filtering
+            const cards = document.querySelectorAll('#duas-grid > div');
+            cards.forEach(card => {
+                if (category === 'all' || card.getAttribute('data-category') === category) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function toggleDuaExpansion(btn) {
+            const drawer = btn.nextElementSibling;
+            const icon = btn.querySelector('.fa-chevron-down');
+            
+            if (drawer.classList.contains('hidden')) {
+                drawer.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                drawer.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+    </script>
+</body>
+</html>
