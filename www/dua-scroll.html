@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Lulu · Du'a Scroll (prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Amiri:wght@400;700&family=Outfit:wght@300;400;500;600&family=Great+Vibes&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --ink:#f3ead4; --ink-soft:#c9bd9e; --ink-faint:#8a8164;
+  --gold:#d9b572; --gold-bright:#f3d79a; --gold-deep:#9c7a3c;
+  --gold-line:rgba(217,181,114,.30);
+  --bg-0:#05070f; --sky-a:#0d1740; --sky-b:#050813;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{
+  font-family:'Outfit',system-ui,sans-serif; color:var(--ink);
+  background:var(--bg-0); position:relative;
+  user-select:none;-webkit-user-select:none;
+  display:flex; flex-direction:column; align-items:center;
+}
+/* ---- celestial backdrop ---- */
+#sky{position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(120% 70% at 50% 4%, #16224a 0%, transparent 46%),
+    radial-gradient(150% 120% at 50% 100%, var(--sky-a) 0%, var(--sky-b) 58%, var(--bg-0) 100%);}
+#clouds{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:url('assets/cloudbgvector.png') no-repeat center bottom;background-size:cover;
+  opacity:.5; -webkit-mask-image:linear-gradient(to bottom, transparent 30%, #000 100%);
+          mask-image:linear-gradient(to bottom, transparent 30%, #000 100%);}
+#stars{position:fixed;inset:0;z-index:1;pointer-events:none;}
+.star{position:absolute;border-radius:50%;background:#fff;
+  animation:tw var(--d,4s) ease-in-out infinite;animation-delay:var(--dl,0s);}
+@keyframes tw{0%,100%{opacity:.2;transform:scale(.7)}50%{opacity:1;transform:scale(1)}}
+#vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(115% 85% at 50% 46%, transparent 54%, rgba(0,0,0,.6) 100%);}
+
+/* ---- shell ---- */
+#app{position:relative;z-index:2;width:100%;max-width:540px;height:100%;
+  display:flex;flex-direction:column;align-items:center;}
+
+header{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:16px 20px 4px;flex:0 0 auto;}
+header .moon{width:22px;height:22px;color:var(--gold);opacity:.9;}
+header .brand{font-family:'Great Vibes',cursive;font-size:26px;color:var(--gold-bright);line-height:1;}
+header .sub{font-family:'Outfit';font-weight:500;font-size:7.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-faint);}
+.brandwrap{display:flex;flex-direction:column;align-items:center;}
+
+/* du'a category chip row (illustrative) */
+.kicker{margin-top:4px;font-family:'Outfit';font-weight:600;font-size:10px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--gold);opacity:.75;text-align:center;flex:0 0 auto;}
+
+/* ---- the scroll ---- */
+#stage{flex:1 1 auto;width:100%;display:flex;align-items:center;justify-content:center;
+  min-height:0;padding:6px 18px 4px;}
+.scroll{position:relative;width:100%;max-width:400px;
+  display:flex;flex-direction:column;align-items:stretch;
+  animation:hover 7s ease-in-out infinite;}
+@keyframes hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+
+/* rods (glass + gold caps) */
+.rod{position:relative;height:30px;border-radius:16px;flex:0 0 auto;z-index:3;
+  background:linear-gradient(to bottom,
+     rgba(20,26,44,.6) 0%, rgba(150,166,206,.35) 32%,
+     rgba(238,242,255,.55) 50%, rgba(120,134,168,.35) 66%, rgba(10,14,26,.65) 100%);
+  box-shadow:0 8px 22px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.4),
+     inset 0 -3px 6px rgba(0,0,0,.35);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
+.rod::before{content:"";position:absolute;left:16px;right:16px;top:7px;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);}
+.rod .cap{position:absolute;top:50%;width:26px;height:34px;transform:translateY(-50%);
+  border-radius:50%;
+  background:radial-gradient(circle at 38% 34%, #fce9bd 0%, var(--gold-bright) 34%, var(--gold) 60%, var(--gold-deep) 100%);
+  box-shadow:0 3px 10px rgba(0,0,0,.5), inset 0 1px 3px rgba(255,255,255,.6);}
+.rod .cap.l{left:-11px;}.rod .cap.r{right:-11px;}
+.rod .cap::after{content:"";position:absolute;top:50%;width:9px;height:12px;transform:translateY(-50%);
+  border-radius:50%;background:radial-gradient(circle at 40% 35%, #fff6df, var(--gold) 70%, var(--gold-deep));}
+.rod .cap.l::after{left:-6px;}.rod .cap.r::after{right:-6px;}
+.rod.bottom{margin-top:-1px;}
+
+/* the parchment sheet — translucent celestial glass */
+.sheet{position:relative;z-index:2;overflow:hidden;
+  margin:-6px 10px;
+  border-radius:6px 6px 10px 10px;
+  background:linear-gradient(180deg, rgba(232,240,255,.16) 0%, rgba(206,220,255,.07) 40%, rgba(220,230,255,.05) 100%);
+  border-left:1px solid rgba(255,255,255,.14);border-right:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(7px) saturate(1.05);-webkit-backdrop-filter:blur(7px) saturate(1.05);
+  box-shadow:inset 0 14px 22px -14px rgba(0,0,0,.7), inset 0 -14px 22px -14px rgba(0,0,0,.55),
+     inset 22px 0 30px -26px rgba(0,0,0,.6), inset -22px 0 30px -26px rgba(0,0,0,.6),
+     0 20px 50px rgba(0,0,0,.4);
+  /* curl of the paper at the sides */
+  transform:perspective(1400px) rotateX(1.2deg);
+  transition:height .1s;}
+/* soft parchment highlight sweeping down the middle */
+.sheet::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg, rgba(0,0,0,.10) 0%, transparent 10%, transparent 90%, rgba(0,0,0,.10) 100%);}
+.sheet-scroll{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:30px 26px 30px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;
+  scrollbar-width:none;}
+.sheet-scroll::-webkit-scrollbar{display:none;}
+/* fade the text into the rods at top & bottom */
+.fade{position:absolute;left:0;right:0;height:26px;z-index:3;pointer-events:none;}
+.fade.top{top:0;background:linear-gradient(to bottom, rgba(9,12,24,.55), transparent);}
+.fade.bot{bottom:0;background:linear-gradient(to top, rgba(9,12,24,.5), transparent);}
+
+.d-title{font-family:'Outfit';font-weight:600;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold-bright);margin-bottom:12px;}
+.d-rule{width:46px;height:1px;margin:0 auto 16px;
+  background:linear-gradient(90deg,transparent,var(--gold-line),transparent);}
+.d-ar{font-family:'Amiri',serif;font-size:23px;line-height:2.05;direction:rtl;
+  color:var(--gold-bright);text-shadow:0 2px 18px rgba(217,181,114,.28);margin-bottom:16px;}
+.d-tl{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14.5px;line-height:1.5;
+  color:var(--ink-soft);margin-bottom:14px;}
+.d-tr{font-family:'Cormorant Garamond',serif;font-size:15.5px;line-height:1.55;
+  color:var(--ink);opacity:.92;margin-bottom:16px;}
+.d-ref{font-family:'Outfit';font-weight:500;font-size:10px;letter-spacing:.06em;
+  color:var(--gold);opacity:.7;display:flex;align-items:center;gap:6px;justify-content:center;}
+.d-ref svg{width:12px;height:12px;}
+.d-note{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;
+  color:var(--ink-faint);margin-top:12px;}
+
+/* ---- footer controls: no counter — a gentle "Āmīn", and browse dots ---- */
+footer{flex:0 0 auto;width:100%;padding:6px 24px calc(18px + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;align-items:center;gap:14px;}
+.dots{display:flex;gap:8px;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--gold-line);transition:.25s;cursor:pointer;}
+.dot.on{background:var(--gold-bright);box-shadow:0 0 10px rgba(243,215,154,.6);transform:scale(1.15);}
+.row{display:flex;align-items:center;gap:16px;}
+.nav{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;cursor:pointer;
+  background:rgba(20,26,44,.5);border:1px solid var(--gold-line);color:var(--ink);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:transform .14s;}
+.nav:active{transform:scale(.92);}
+.nav svg{width:22px;height:22px;}
+.amin{height:52px;padding:0 30px;border-radius:16px;cursor:pointer;
+  font-family:'Outfit';font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;
+  color:#1a1206;background:linear-gradient(180deg,var(--gold-bright),var(--gold));
+  border:none;box-shadow:0 8px 22px rgba(217,181,114,.28);transition:transform .14s;
+  display:flex;align-items:center;gap:9px;}
+.amin:active{transform:scale(.96);}
+.amin.done{background:rgba(20,26,44,.5);color:var(--gold-bright);border:1px solid var(--gold-line);
+  box-shadow:none;}
+.amin svg{width:17px;height:17px;}
+.hint{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--ink-faint);}
+
+/* content swap animation */
+.swap{animation:swapin .5s var(--e,cubic-bezier(.22,1,.36,1));}
+@keyframes swapin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* a little sparkle burst when saying Āmīn */
+.spark{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none;z-index:9;
+  background:radial-gradient(circle,#fff8e0,rgba(243,215,154,0));}
+</style>
+</head>
+<body>
+<div id="sky"></div>
+<div id="clouds"></div>
+<div id="stars"></div>
+<div id="vignette"></div>
+
+<div id="app">
+  <header>
+    <svg class="moon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+    <div class="brandwrap">
+      <div class="brand">Lulu</div>
+      <div class="sub">Celestial Dhikr Counter</div>
+    </div>
+  </header>
+  <div class="kicker" id="kicker">Supplications · Du'ā</div>
+
+  <div id="stage">
+    <div class="scroll" id="scroll">
+      <div class="rod top"><span class="cap l"></span><span class="cap r"></span></div>
+      <div class="sheet" id="sheet">
+        <div class="fade top"></div>
+        <div class="sheet-scroll" id="sheetScroll"></div>
+        <div class="fade bot"></div>
+      </div>
+      <div class="rod bottom"><span class="cap l"></span><span class="cap r"></span></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="dots" id="dots"></div>
+    <div class="row">
+      <div class="nav" id="prev" aria-label="Previous">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+      </div>
+      <button class="amin" id="amin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span id="aminLabel">Āmīn</span>
+      </button>
+      <div class="nav" id="next" aria-label="Next">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </div>
+    </div>
+    <div class="hint" id="hint">Swipe or use the arrows to move through the du'ās</div>
+  </footer>
+</div>
+
+<script>
+/* ---------- starfield ---------- */
+(function(){
+  const host=document.getElementById('stars');
+  for(let i=0;i<90;i++){
+    const s=document.createElement('span');s.className='star';
+    const big=Math.random()<0.08;
+    const r=big?2.2:(0.5+Math.random()*1.1);
+    s.style.width=s.style.height=r+'px';
+    s.style.left=Math.random()*100+'%';
+    s.style.top=Math.random()*82+'%';
+    s.style.setProperty('--d',(2.5+Math.random()*4)+'s');
+    s.style.setProperty('--dl',(Math.random()*4)+'s');
+    if(big)s.style.boxShadow='0 0 7px 1px rgba(255,247,224,.8)';
+    host.appendChild(s);
+  }
+})();
+
+/* ---------- du'ā content (read, not counted) ---------- */
+const DUAS=[
+  { title:'Relief from distress',
+    ar:'لَا إِلَٰهَ إِلَّا ٱللَّٰهُ ٱلْعَظِيمُ ٱلْحَلِيمُ، لَا إِلَٰهَ إِلَّا ٱللَّٰهُ رَبُّ ٱلْعَرْشِ ٱلْعَظِيمِ، لَا إِلَٰهَ إِلَّا ٱللَّٰهُ رَبُّ ٱلسَّمَاوَاتِ وَرَبُّ ٱلْأَرْضِ وَرَبُّ ٱلْعَرْشِ ٱلْكَرِيم',
+    tl:'La ilaha illallahul-‘Azimul-Halim, la ilaha illallahu Rabbul-‘Arshil-‘azim, la ilaha illallahu Rabbus-samawati wa Rabbul-ardi wa Rabbul-‘Arshil-karim',
+    tr:'There is no god but Allah, the Magnificent, the Forbearing. There is no god but Allah, Lord of the Magnificent Throne. There is no god but Allah, Lord of the heavens, Lord of the earth, and Lord of the Noble Throne.',
+    ref:'Bukhari 6346 · Muslim 2730',
+    note:'The Prophet ﷺ would say these words in times of grief and distress.' },
+  { title:'Settlement of debt',
+    ar:'ٱللَّٰهُمَّ ٱكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ، وَأَغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاك',
+    tl:'Allahummak-fini bihalalika ‘an haramik, wa aghnini bifadlika ‘amman siwak',
+    tr:'O Allah, suffice me with what is lawful against what is unlawful, and make me independent, by Your grace, of all besides You.',
+    ref:'Tirmidhi 3563',
+    note:'For one burdened by debt, even were it like a mountain.' },
+  { title:'Istikhārah — seeking guidance',
+    ar:'ٱللَّٰهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ، وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ ٱلْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلَا أَقْدِرُ، وَتَعْلَمُ وَلَا أَعْلَمُ، وَأَنْتَ عَلَّامُ ٱلْغُيُوبِ. ٱللَّٰهُمَّ إِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا ٱلْأَمْرَ خَيْرٌ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي فَٱقْدُرْهُ لِي وَيَسِّرْهُ لِي ثُمَّ بَارِكْ لِي فِيهِ، وَإِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا ٱلْأَمْرَ شَرٌّ لِي فَٱصْرِفْهُ عَنِّي وَٱصْرِفْنِي عَنْهُ، وَٱقْدُرْ لِيَ ٱلْخَيْرَ حَيْثُ كَانَ ثُمَّ أَرْضِنِي بِه',
+    tl:'Allahumma inni astakhiruka bi‘ilmik, wa astaqdiruka biqudratik, wa as’aluka min fadlikal-‘azim… Allahumma in kunta ta‘lamu anna hadhal-amra khayrun li fi dini wa ma‘ashi wa ‘aqibati amri faqdurhu li wa yassirhu li thumma barik li fih…',
+    tr:'O Allah, I seek Your guidance by Your knowledge and Your power, and I ask You of Your great bounty. For You are able and I am not, You know and I do not, and You are the Knower of the unseen. O Allah, if You know this matter to be good for me in my religion, my livelihood and the outcome of my affair, then decree it for me, make it easy for me and bless me in it…',
+    ref:'Bukhari 1162',
+    note:'Pray two units of voluntary prayer, then make this supplication and name your need.' },
+];
+
+const els={
+  sheet:document.getElementById('sheet'),
+  scroll:document.getElementById('sheetScroll'),
+  dots:document.getElementById('dots'),
+  amin:document.getElementById('amin'),
+  aminLabel:document.getElementById('aminLabel'),
+};
+let idx=0;
+const said=new Set();
+
+DUAS.forEach((_,i)=>{
+  const d=document.createElement('span');d.className='dot'+(i===0?' on':'');
+  d.addEventListener('click',()=>go(i));els.dots.appendChild(d);
+});
+
+function render(){
+  const d=DUAS[idx];
+  els.scroll.innerHTML=
+    '<div class="d-title swap">'+d.title+'</div>'+
+    '<div class="d-rule"></div>'+
+    '<div class="d-ar swap">'+d.ar+'</div>'+
+    '<div class="d-tl swap">'+d.tl+'</div>'+
+    '<div class="d-tr swap">'+d.tr+'</div>'+
+    '<div class="d-ref swap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5h13a2 2 0 0 1 2 2v12H6a2 2 0 0 1-2-2z"/><path d="M9 5v14"/></svg>'+d.ref+'</div>'+
+    (d.note?'<div class="d-note swap">'+d.note+'</div>':'');
+  els.scroll.scrollTop=0;
+  [...els.dots.children].forEach((x,i)=>x.classList.toggle('on',i===idx));
+  const done=said.has(idx);
+  els.amin.classList.toggle('done',done);
+  els.aminLabel.textContent=done?'Ameen said':'Āmīn';
+}
+function go(i){ idx=(i+DUAS.length)%DUAS.length; render(); }
+document.getElementById('prev').addEventListener('click',()=>go(idx-1));
+document.getElementById('next').addEventListener('click',()=>go(idx+1));
+
+/* Āmīn — the "completion" for a du'a: a soft sparkle, no counting */
+els.amin.addEventListener('click',()=>{
+  said.add(idx);render();
+  const r=els.amin.getBoundingClientRect();
+  for(let k=0;k<14;k++){
+    const s=document.createElement('span');s.className='spark';
+    const a=Math.random()*6.28,dist=30+Math.random()*46;
+    s.style.left=(r.left+r.width/2)+'px';s.style.top=(r.top+r.height/2)+'px';
+    document.body.appendChild(s);
+    const dx=Math.cos(a)*dist,dy=Math.sin(a)*dist-20;
+    s.animate([{transform:'translate(0,0) scale(1)',opacity:1},
+      {transform:'translate('+dx+'px,'+dy+'px) scale(0)',opacity:0}],
+      {duration:750+Math.random()*350,easing:'cubic-bezier(.2,.8,.2,1)'}).onfinish=()=>s.remove();
+  }
+});
+
+/* swipe */
+let sx=0,sy=0;
+els.sheet.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+els.sheet.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))go(dx<0?idx+1:idx-1);
+});
+
+/* size the sheet to the available stage height, then unfurl */
+function fit(){
+  const stage=document.getElementById('stage').getBoundingClientRect();
+  const h=Math.max(260,Math.min(stage.height-60,540));
+  els.sheet.style.height=h+'px';
+}
+window.addEventListener('resize',fit);
+fit();
+els.sheet.animate([{height:'0px',opacity:0},{height:els.sheet.style.height,opacity:1}],
+  {duration:900,easing:'cubic-bezier(.22,1,.36,1)'});
+render();
+</script>
+</body>
+</html>
